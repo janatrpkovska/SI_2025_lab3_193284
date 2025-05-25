@@ -20,18 +20,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - name: Show current directory and files
+        run: pwd && ls -la
+
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/si-2025-lab3:${{ github.ref_name }}-latest .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/si-2025-lab3:latest .
+
+      - name: Show Docker images
+        run: docker images
 
   docker-push:
     needs: docker-build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
       - name: Push Docker image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/si-2025-lab3:${{ github.ref_name }}-latest
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/si-2025-lab3:latest
 
   deploy-page:
     if: github.ref_name == 'master'
@@ -42,9 +51,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v1
         with:
           path: .
+
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
